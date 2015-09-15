@@ -69,6 +69,7 @@ struct client *createGenericClient(struct net_service *service, int fd);
 // view1090 / faup1090 want to create these themselves:
 struct net_service *makeBeastInputService(void);
 struct net_service *makeFatsvOutputService(void);
+struct net_service *makeZfamOutputService(void);
 
 void modesInitNet(void);
 void modesQueueOutput(struct modesMessage *mm);

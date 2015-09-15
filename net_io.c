@@ -193,6 +193,11 @@ struct net_service *makeFatsvOutputService(void)
     return serviceInit("FATSV TCP output", &Modes.fatsv_out, NULL, NULL, NULL);
 }
 
+struct net_service *makeZfamOutputService(void)
+{
+    return serviceInit("ZFAM TCP output", &Modes.zfam_out, NULL, NULL, NULL);
+}
+
 void modesInitNet(void) {
     struct net_service *s;
 
@@ -220,6 +225,11 @@ void modesInitNet(void) {
     if (Modes.net_fatsv_port) {
         s = makeFatsvOutputService();
         serviceListen(s, Modes.net_bind_address, Modes.net_fatsv_port);
+    }
+    
+    if (Modes.net_zfam_port) {
+        s = makeZfamOutputService();
+        serviceListen(s, Modes.net_bind_address, Modes.net_zfam_port);
     }
 
     if (Modes.net_input_raw_port) {
@@ -1741,6 +1751,208 @@ static void writeFATSV()
     }
 }
 
+#define ZFAM_MAX_PACKET_SIZE 160
+
+static void writeZFAM()
+{
+    struct aircraft *a;
+    uint64_t now;
+    static uint64_t next_update;
+
+    if (!Modes.zfam_out.service || !Modes.zfam_out.service->connections) {
+        return; // not enabled or no active connections
+    }
+
+    now = mstime();
+    if (now < next_update) {
+        return;
+    }
+
+    // scan once a second at most
+    next_update = now + 1000;
+
+    for (a = Modes.aircrafts; a; a = a->next) {
+        int altValid = 0;
+        int alt = 0;
+        uint64_t altAge = 999999;
+
+        int groundValid = 0;
+        int ground = 0;
+
+        int latlonValid = 0;
+        uint64_t latlonAge = 999999;
+
+        int speedValid = 0;
+        uint64_t speedAge = 999999;
+
+        int trackValid = 0;
+        uint64_t trackAge = 999999;
+
+        uint64_t emittedAge;
+
+        int useful = 0;
+        int ident = 0;
+        int changed = 0;
+
+        char *p, *end;
+
+        int flags;
+
+        // skip non-ICAO
+        if (a->addr & MODES_NON_ICAO_ADDRESS)
+            continue;
+
+        if (a->messages < 2)  // basic filter for bad decodes
+            continue;
+
+        // don't emit if it hasn't updated since last time
+        if (a->seen < a->zfam_last_emitted) {
+            continue;
+        }
+
+        emittedAge = (now - a->zfam_last_emitted);
+
+        // ignore all mlat-derived data
+        flags = a->bFlags & ~a->mlatFlags;
+
+        if (flags & MODES_ACFLAGS_ALTITUDE_VALID) {
+            alt = a->altitude;
+            altAge = now - a->seenAltitude;
+            altValid = (altAge <= 30000);
+        }
+        
+        if (flags & MODES_ACFLAGS_AOG_VALID) {
+            groundValid = 1;
+
+            if (flags & MODES_ACFLAGS_AOG) {
+                // force zero altitude on ground
+                alt = 0;
+                altValid = 1;
+                altAge = 0;
+                ground = 1;
+            }
+        }
+
+        if (flags & MODES_ACFLAGS_LATLON_VALID) {
+            latlonAge = now - a->seenLatLon;
+            latlonValid = (latlonAge <= 30000);
+        }
+
+        if (flags & MODES_ACFLAGS_HEADING_VALID) {
+            trackAge = now - a->seenTrack;
+            trackValid = (trackAge <= 30000);
+        }
+
+        if (flags & MODES_ACFLAGS_SPEED_VALID) {
+            speedAge = now - a->seenSpeed;
+            speedValid = (speedAge <= 30000);
+        }
+
+        // don't send mode S very often
+        if (!latlonValid && emittedAge < 30000) {
+            continue;
+        }
+
+        // if it hasn't changed altitude, heading, or speed much,
+        // don't update so often
+        changed = 0;
+        if (trackValid && abs(a->track - a->zfam_emitted_track) >= 2) {
+            changed = 1;
+        }
+        if (speedValid && abs(a->speed - a->zfam_emitted_speed) >= 25) {
+            changed = 1;
+        }
+        if (altValid && abs(alt - a->zfam_emitted_altitude) >= 50) {
+            changed = 1;
+        }
+
+        if (!altValid || alt < 10000) {
+            // Below 10000 feet, emit up to every 5s when changing, 10s otherwise
+            if (changed && emittedAge < 5000)
+                continue;
+            if (!changed && emittedAge < 10000)
+                continue;
+        } else {
+            // Above 10000 feet, emit up to every 10s when changing, 30s otherwise
+            if (changed && emittedAge < 10000)
+                continue;
+            if (!changed && emittedAge < 30000)
+                continue;
+        }
+
+        p = prepareWrite(&Modes.zfam_out, ZFAM_MAX_PACKET_SIZE);
+        if (!p)
+            return;
+
+        end = p + ZFAM_MAX_PACKET_SIZE;
+#       define bufsize(_p,_e) ((_p) >= (_e) ? (size_t)0 : (size_t)((_e) - (_p)))
+        p += snprintf(p, bufsize(p,end), "%ld;%06X;", (long)(a->seen / 1000), a->addr);
+
+        if (*a->flight != '\0') {
+	    char flight[256];
+	    sscanf(a->flight, "%s", flight);
+            p += snprintf(p, bufsize(p,end), "%s;", flight);
+            ident = 1;
+        } else p += snprintf(p, bufsize(p,end), ";");
+
+        if (flags & MODES_ACFLAGS_SQUAWK_VALID) {
+            p += snprintf(p, bufsize(p,end), "%04x;", a->modeA);
+        } else p += snprintf(p, bufsize(p,end), ";");
+
+        // only emit alt, speed, latlon, track if they have been received since the last time
+        // and are not stale
+
+        if (altValid && altAge < emittedAge) {
+            p += snprintf(p, bufsize(p,end), "%d;", alt);
+            useful = 1;
+        } else p += snprintf(p, bufsize(p,end), ";");
+
+        if (speedValid && speedAge < emittedAge) {
+            p += snprintf(p, bufsize(p,end), "%d;", a->speed);
+            useful = 1;
+        } else p += snprintf(p, bufsize(p,end), ";");
+
+        if (groundValid) {
+            if (ground) {
+                p += snprintf(p, bufsize(p,end), "G;");
+            } else {
+                p += snprintf(p, bufsize(p,end), "A;");
+            }
+        } else p += snprintf(p, bufsize(p,end), ";");
+
+        if (latlonValid && latlonAge < emittedAge) {
+            p += snprintf(p, bufsize(p,end), "%.5f;%.5f;", a->lat, a->lon);
+            useful = 1;
+        } else p += snprintf(p, bufsize(p,end), ";;");
+
+        if (trackValid && trackAge < emittedAge) {
+            p += snprintf(p, bufsize(p,end), "%d;", a->track);
+            useful = 1;
+        } else p += snprintf(p, bufsize(p,end), ";");
+
+        // if we didn't get at least an alt or a speed or a latlon or
+        // a heading, bail out. We don't need to do anything special
+        // to unwind prepareWrite().
+        if (!useful || !ident) {
+            continue;
+        }
+        
+        p += snprintf(p, bufsize(p,end), "\n");
+
+        if (p <= end)
+            completeWrite(&Modes.zfam_out, p);
+        else
+            fprintf(stderr, "zfam: output too large (max %d, overran by %d)\n", ZFAM_MAX_PACKET_SIZE, (int) (p - end));
+#       undef bufsize
+
+        a->zfam_last_emitted = now;
+        a->zfam_emitted_altitude = alt;
+        a->zfam_emitted_track = a->track;
+        a->zfam_emitted_speed = a->speed;
+    }
+}
+
+
 //
 // Perform periodic network work
 //
@@ -1763,6 +1975,7 @@ void modesNetPeriodicWork(void) {
 
     // Generate FATSV output
     writeFATSV();
+    writeZFAM();
 
     // If we have generated no messages for a while, send
     // a heartbeat

@@ -89,6 +89,11 @@ struct aircraft {
     int           fatsv_emitted_speed;     // last FA emitted speed
     uint64_t      fatsv_last_emitted;      // time (millis) aircraft was last FA emitted
 
+    int           zfam_emitted_altitude;  // last FA emitted altitude
+    int           zfam_emitted_track;     // last FA emitted track
+    int           zfam_emitted_speed;     // last FA emitted speed
+    uint64_t      zfam_last_emitted;      // time (millis) aircraft was last FA emitted
+
     // Encoded latitude and longitude as extracted by odd and even CPR encoded messages
     uint64_t      odd_cprtime;
     int           odd_cprlat;

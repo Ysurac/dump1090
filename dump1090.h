@@ -196,6 +196,7 @@ typedef struct rtlsdr_dev rtlsdr_dev_t;
 #define MODES_NET_OUTPUT_BEAST_PORT 30005
 #define MODES_NET_HTTP_PORT          8080
 #define MODES_NET_OUTPUT_FA_TSV_PORT 10001
+#define MODES_NET_OUTPUT_ZFAIM_PORT 10001
 #define MODES_CLIENT_BUF_SIZE  1024
 #define MODES_NET_SNDBUF_SIZE (1024*64)
 #define MODES_NET_SNDBUF_MAX  (7)
@@ -281,6 +282,7 @@ struct {                             // Internal state
     struct net_writer beast_out;     // Beast-format output
     struct net_writer sbs_out;       // SBS-format output
     struct net_writer fatsv_out;     // FATSV-format output
+    struct net_writer zfam_out;     // ZFAM-format output
 
 #ifdef _WIN32
     WSADATA        wsaData;          // Windows socket initialisation
@@ -309,6 +311,7 @@ struct {                             // Internal state
     char  *net_bind_address;         // Bind address
     int   net_http_port;             // HTTP port
     int   net_fatsv_port;            // FlightAware TSV port
+    int   net_zfam_port;            // FlightAware TSV port
     int   net_sndbuf_size;           // TCP output buffer size (64Kb * 2^n)
     int   net_verbatim;              // if true, send the original message, not the CRC-corrected one
     int   forward_mlat;              // allow forwarding of mlat messages to output ports
