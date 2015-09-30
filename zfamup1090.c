@@ -120,6 +120,7 @@ static void showHelp(void) {
 "--lon <longitude>           Reference/receiver longitude for surface posn (opt)\n"
 "--max-range <distance>      Absolute maximum range for position decoding (in nm, default: 300)\n"
 "--stdout                    REQUIRED. Write results to stdout.\n"
+"--verbose                   Show more debug info.\n"
 "--help                      Show this help\n"
 "\n",
 MODES_DUMP1090_VARIANT " " MODES_DUMP1090_VERSION
@@ -147,13 +148,14 @@ int main(int argc, char **argv) {
     CURLcode res;
     int j;
     int stdout_option = 0;
+    int verbose = 0;
     long httpCode = 0;
     char *bo_connect_ipaddr = "127.0.0.1";
     char* post;
     char *zfam_connect_addr = "https://input.flightairmap.fr";
-    int zfam_connect_port = 1001;
-    char *zfam_connect_user;
-    char *zfam_connect_pass;
+    int zfam_connect_port = 443;
+    char *zfam_connect_user = "";
+    char *zfam_connect_pass = "";
     char *zfam_connect_userpass;
     int bo_connect_port = MODES_NET_OUTPUT_BEAST_PORT;
     struct client *c;
@@ -188,6 +190,8 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[j],"--help")) {
             showHelp();
             exit(0);
+        } else if (!strcmp(argv[j],"--verbose")) {
+            verbose = 1;
         } else if (!strcmp(argv[j],"--stdout")) {
             stdout_option = 1;
         } else {
@@ -220,10 +224,12 @@ int main(int argc, char **argv) {
         curl_easy_setopt(curl, CURLOPT_PORT, zfam_connect_port);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
         curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "");
         curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "");
         curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
         curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
+        if (verbose) curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 	zfam_connect_userpass = (char *)malloc(strlen(zfam_connect_user)+strlen(zfam_connect_pass)+1+1);
 	strcpy(zfam_connect_userpass,zfam_connect_user);
 	strcat(zfam_connect_userpass,":");
