@@ -552,7 +552,7 @@ void readDataFromFile(void) {
                 eof = 1;
                 break;
             }
-            r += nread;
+            (char*)r += nread;
             toread -= nread;
         }
 
@@ -612,7 +612,11 @@ void *readerThreadEntryPoint(void *arg) {
                 Modes.dev = NULL;
 
                 do {
+#ifndef _WIN32
                     sleep(5);
+#else
+					Sleep(5 * 1000);
+#endif
                     log_with_timestamp("Trying to reconnect to the RTLSDR device..");
                 } while (!Modes.exit && modesInitRTLSDR() < 0);
             }
@@ -1087,11 +1091,12 @@ int main(int argc, char **argv) {
         }
     }
 
+	/*
 #ifdef _WIN32
     // Try to comply with the Copyright license conditions for binary distribution
     if (!Modes.quiet) {showCopyright();}
 #endif
-
+*/
 #ifndef _WIN32
     // Setup for SIGWINCH for handling lines
     if (Modes.interactive) {signal(SIGWINCH, sigWinchCallback);}

@@ -36,4 +36,5 @@ int64_t receiveclock_ns_elapsed(uint64_t t1, uint64_t t2);
 struct timespec;
 void normalize_timespec(struct timespec *ts);
 
+struct timeval;
 #endif
