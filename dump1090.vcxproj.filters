@@ -141,13 +141,13 @@
     <Library Include="rtlsdr\rtlsdr.lib">
       <Filter>Library Files</Filter>
     </Library>
-    <Library Include="pthread\pthreadVC2.lib">
-      <Filter>Library Files</Filter>
-    </Library>
     <Library Include="rtlsdr\rtlsdr_static.lib">
       <Filter>Library Files</Filter>
     </Library>
-    <Library Include="winposixclock\winposixclock.lib">
+    <Library Include="compat\winposixclock\winposixclock.lib">
+      <Filter>Library Files</Filter>
+    </Library>
+    <Library Include="compat\pthread\pthreadVC2.lib">
       <Filter>Library Files</Filter>
     </Library>
   </ItemGroup>

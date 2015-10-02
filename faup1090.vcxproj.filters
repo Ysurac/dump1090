@@ -33,7 +33,7 @@
     <ClCompile Include="net_io.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="view1090.c">
+    <ClCompile Include="faup1090.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="crc.c">
@@ -59,7 +59,7 @@
     <ClInclude Include="dump1090.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="view1090.h">
+    <ClInclude Include="faup1090.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="winstubs.h">
