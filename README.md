@@ -1,11 +1,8 @@
 This is a fork of the fork of tpainter ;)
 
-# dump1090-win Windows package
+# dump1090-flightairmap GNU/Linux & Windows package
 
-This is a fork of Oliver Jowett's version of dump1090 (dump1090-mutability)
-and is designed to be built as a Windows package. It does not
-add any new functionality. It serves solely as fork to track the developement
-of dump1090-mutability and provide similar features for Windows users.
+This is a fork of tpainter windows version of the fork of Oliver Jowett's version of dump1090 (dump1090-mutability).
 
 This version is licensed under the GPL (v3 or later).
 See the file COPYING for details.
@@ -32,14 +29,14 @@ No logging in Windows is currently configured.
 
 # Bug reports, feedback etc
 
-Please use the [github issues page](https://github.com/tpainter/dump1090_win/issues) to report any problems.
-Or you can [email me](mailto:travispainter@gmail.com).
+Please use the [github issues page](https://github.com/ysurac/dump1090/issues) to report any problems.
 
 # Future plans
 
-It is anticipated that each release of dump1090-mutability will be closely followed by a release of dump1090-win.
+It is anticipated that each release of dump1090-mutability will be closely followed by a release of dump1090-flightairmap.
 
 # Building from source
 
-The programs dump1090.exe and view1090.exe are built from source using Microsoft Visual Studio 2010. Just open
+The programs dump1090.exe and view1090.exe are built from source using Microsoft Visual Studio 2015. Just open
 the dump1090.sln file.
+You can also use Mingw32 : make -f Makefile.mingw32
