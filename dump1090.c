@@ -552,8 +552,11 @@ void readDataFromFile(void) {
                 eof = 1;
                 break;
             }
-            //(char*)r += nread;
+#ifdef __MSC_VER
+            (char*)r += nread;
+#else
             r += nread;
+#endif
             toread -= nread;
         }
 
