@@ -55,6 +55,11 @@
 #ifndef __WINSTUBS_H
 #define __WINSTUBS_H
 
+#ifdef __MINGW32__
+#define __USE_MINGW_ANSI_STDIO 1
+#endif
+
+
 #include <winsock2.h>
 #include <windows.h>
 #include <basetsd.h>
@@ -64,8 +69,10 @@ typedef USHORT   uint16_t;
 typedef UINT32   uint32_t;
 typedef UINT64   uint64_t;
 //typedef UINT32   mode_t;
-typedef long     ssize_t;
 typedef int      socklen_t;
+#ifndef __MINGW32__
+typedef long     ssize_t;
+#endif
 
 
 #include <stdio.h>
@@ -81,6 +88,9 @@ typedef int      socklen_t;
 #include <pthread.h>
 #include <winposixclock.h>
 #include <endian.h>
+#ifdef __MINGW32__
+#include <ctype.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -89,19 +99,24 @@ extern "C" {
 //Remove gcc specific __atribute__
 #define __attribute__(A)
 
-//Functions not included in the MSVC maths library. This will do for our use.
-_inline double round(double d) {return floor(d + 0.5);}
-_inline double trunc(double d) {return (d>0) ? floor(d):ceil(d) ;}
+#ifdef __MINGW32__
+#define _inline __inline
+#endif
 
+//Functions not included in the MSVC maths library. This will do for our use.
+extern _inline double round(double d) {return floor(d + 0.5);}
+extern _inline double trunc(double d) {return (d>0) ? floor(d):ceil(d) ;}
 //usleep works in microseconds, and isn't supported in Windows. This will do for our use.
-_inline void usleep(UINT32 ulSleep) {Sleep(ulSleep/1000);} 
+extern _inline void usleep(UINT32 ulSleep) {Sleep(ulSleep/1000);} 
 //_inline uint64_t strtoll(const char *p, void *e, UINT32 base) {return _atoi64(p);}
-_inline int inet_aton(const char * cp, DWORD * ulAddr) { *ulAddr = inet_addr(cp); return (INADDR_NONE != *ulAddr);} 
+extern _inline int inet_aton(const char * cp, DWORD * ulAddr) { *ulAddr = inet_addr(cp); return (INADDR_NONE != *ulAddr);} 
+
 #define snprintf  _snprintf
 #define vsnprintf _vsnprintf
 #define strcasecmp _stricmp
 #define realpath(N,R) _fullpath((R),(N),_MAX_PATH)
 
+#ifdef _MSC_VER
 enum {
 	PATH_MAX = MAX_PATH
 };
@@ -112,8 +127,25 @@ _inline struct tm *localtime_r(time_t *_clock, struct tm *_result)
     _localtime64_s(_result, _clock);
     return _result;
 }
+#endif
+#ifdef __MINGW32__
+extern _inline struct tm *localtime_r(const time_t *timep, struct tm *result)
+{
+    struct tm *p = localtime(timep);
+    memset(result, 0, sizeof(*result));
+    if (p) {
+	*result = *p;
+	p = result;
+    }
+    return p;
+}
+struct timezone {
+    int tz_minuteswest;
+    int tz_dsttime;
+};
+#endif
 
-_inline void cls() {
+extern _inline void cls() {
     HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
     COORD coord = {0, 0};
     DWORD count;
@@ -156,16 +188,19 @@ _inline void cls() {
  */
 
 /* FILETIME of Jan 1 1970 00:00:00. */
+#ifndef __MINGW32__
 static const unsigned __int64 epoch = ((unsigned __int64) 116444736000000000ULL);
-
+#endif
 /*
  * timezone information is stored outside the kernel so tzp isn't used anymore.
  *
  * Note: this function is not for Win32 high precision timing purpose. See
  * elapsed_time().
  */
-_inline int gettimeofday(struct timeval * tp, struct timezone * tzp)
+extern _inline int gettimeofday(struct timeval * tp,  struct timezone *tz)
 {
+    const unsigned __int64 epoch = ((unsigned __int64) 116444736000000000ULL);
+
     FILETIME    file_time;
     SYSTEMTIME  system_time;
     ULARGE_INTEGER ularge;
@@ -184,9 +219,10 @@ _inline int gettimeofday(struct timeval * tp, struct timezone * tzp)
 
 #define STDIN_FILENO 0
 #define STDOUT_FILENO 1
-//#define EINPROGRESS  WSAEINPROGRESS
-//#define EWOULDBLOCK  WSAEWOULDBLOCK
-
+#ifdef __MINGW32__
+#define EINPROGRESS  WSAEINPROGRESS
+#define EWOULDBLOCK  WSAEWOULDBLOCK
+#endif
 #ifdef __cplusplus
 }
 #endif

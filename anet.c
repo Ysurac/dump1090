@@ -62,7 +62,11 @@ static void anetSetError(char *err, const char *fmt, ...)
 
 int anetNonBlock(char *err, int fd)
 {
+#if __MINGW32__
+    unsigned long flags;
+#else
     int flags;
+#endif
 #ifndef _WIN32
     /* Set the socket nonblocking.
      * Note that fcntl(2) for F_GETFL and F_SETFL can't be

@@ -552,7 +552,8 @@ void readDataFromFile(void) {
                 eof = 1;
                 break;
             }
-            (char*)r += nread;
+            //(char*)r += nread;
+            r += nread;
             toread -= nread;
         }
 

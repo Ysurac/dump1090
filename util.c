@@ -49,12 +49,12 @@
 
 #include "util.h"
 
-#include <stdlib.h>
 #ifndef _WIN32
 #include <sys/time.h>
 #else
 #include "winstubs.h"
 #endif
+#include <stdlib.h>
 
 
 uint64_t mstime(void)
