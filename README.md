@@ -1,4 +1,4 @@
-This is a fork of the fork of tpainter ;)
+This fork is a fork of mutability fork with changes to supports windows from tpainter.
 
 # dump1090-flightairmap GNU/Linux & Windows package
 
@@ -37,6 +37,13 @@ It is anticipated that each release of dump1090-mutability will be closely follo
 
 # Building from source
 
-The programs dump1090.exe and view1090.exe are built from source using Microsoft Visual Studio 2015. Just open
-the dump1090.sln file.
-You can also use Mingw32 : make -f Makefile.mingw32
+## For Linux
+    mkdir build
+    cd build
+    make ./..
+
+## For Windows
+    mkdir build
+    cd build
+    make ./.. -DCMAKE_TOOLCHAIN_FILE=../cmake/Modules/Toolchain-mingw32.cmake
+
