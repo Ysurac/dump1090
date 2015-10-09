@@ -77,7 +77,7 @@ typedef long     ssize_t;
 
 #include <stdio.h>
 #include <time.h>
-#include <sys/timeb.h>
+#include <sys/time.h>
 #include <sys/stat.h>
 #include <signal.h>
 #include <io.h>
@@ -86,7 +86,9 @@ typedef long     ssize_t;
 #define M_PI 3.14159265358979323846
 #include <math.h>
 #include <pthread.h>
-#include <winposixclock.h>
+#include <pthread_time.h>
+#include <compat.h>
+//#include <winposixclock.h>
 #include <endian.h>
 #ifdef __MINGW32__
 #include <ctype.h>
@@ -139,10 +141,12 @@ extern _inline struct tm *localtime_r(const time_t *timep, struct tm *result)
     }
     return p;
 }
+/*
 struct timezone {
     int tz_minuteswest;
     int tz_dsttime;
 };
+*/
 #endif
 
 extern _inline void cls() {
@@ -197,6 +201,7 @@ static const unsigned __int64 epoch = ((unsigned __int64) 116444736000000000ULL)
  * Note: this function is not for Win32 high precision timing purpose. See
  * elapsed_time().
  */
+/*
 extern _inline int gettimeofday(struct timeval * tp,  struct timezone *tz)
 {
     const unsigned __int64 epoch = ((unsigned __int64) 116444736000000000ULL);
@@ -215,13 +220,15 @@ extern _inline int gettimeofday(struct timeval * tp,  struct timezone *tz)
 
     return 0;
 }
-
+*/
 
 #define STDIN_FILENO 0
 #define STDOUT_FILENO 1
 #ifdef __MINGW32__
+#ifndef EINPROGRESS
 #define EINPROGRESS  WSAEINPROGRESS
-#define EWOULDBLOCK  WSAEWOULDBLOCK
+//#define EWOULDBLOCK  WSAEWOULDBLOCK
+#endif
 #endif
 #ifdef __cplusplus
 }
