@@ -40,10 +40,10 @@ It is anticipated that each release of dump1090-mutability will be closely follo
 ## For Linux
     mkdir build
     cd build
-    make ./..
+    cmake ./..
 
 ## For Windows
     mkdir build
     cd build
-    make ./.. -DCMAKE_TOOLCHAIN_FILE=../cmake/Modules/Toolchain-mingw32.cmake
+    cmake ./.. -DCMAKE_TOOLCHAIN_FILE=../cmake/Modules/Toolchain-mingw32.cmake
 
