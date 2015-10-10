@@ -1,0 +1,22 @@
+--- mingw-w64-libraries/winpthreads/include/pthread.h	2015-07-24 11:29:27.000000000 +0200
++++ winpthreads/src/include/pthread.h	2015-10-05 15:22:19.011539025 +0200
+@@ -158,7 +158,7 @@
+ #define PTHREAD_MUTEX_RECURSIVE_NP	PTHREAD_MUTEX_RECURSIVE
+ 
+ void * WINPTHREAD_API pthread_timechange_handler_np(void * dummy);
+-int    WINPTHREAD_API pthread_delay_np (const struct timespec *interval);
++//int    WINPTHREAD_API pthread_delay_np (const struct timespec *interval);
+ int    WINPTHREAD_API pthread_num_processors_np(void);
+ int    WINPTHREAD_API pthread_set_num_processors_np(int n);
+ 
+--- mingw-w64-libraries/winpthreads/src/ref.c	2015-07-24 11:29:27.000000000 +0200
++++ winpthreads/src/src/ref.c	2015-10-05 15:23:06.534811584 +0200
+@@ -21,7 +21,7 @@
+ */
+ 
+ #include <windows.h>
+-#include <winternl.h>
++//#include <winternl.h>
+ #include <stdio.h>
+ #include "pthread.h"
+ #include "semaphore.h"
