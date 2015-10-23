@@ -109,7 +109,6 @@ static void showHelp(void) {
 "-----------------------------------------------------------------------------\n"
 "| faup1090 ModeS conversion     %45s |\n"
 "-----------------------------------------------------------------------------\n"
-"--net-bind-address <ip>     IP address to bind to (default: Any; Use 127.0.0.1 for private)\n"
 "--net-bo-ipaddr <addr>      IP address to connect to for Beast data (default: 127.0.0.1)\n"
 "--net-bo-port <port>        Port to connect for Beast data (default: 30005)\n"
 "--net-zfam-port <port>      Zugaina FAM output port (default: 1001)\n"
