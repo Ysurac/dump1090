@@ -163,6 +163,8 @@ typedef struct rtlsdr_dev rtlsdr_dev_t;
 #define MODES_ACFLAGS_REL_CPR_USED   (1<<16) // Lat/lon derived from relative CPR
 #define MODES_ACFLAGS_CATEGORY_VALID (1<<17) // Aircraft category is known
 #define MODES_ACFLAGS_FROM_MLAT      (1<<18) // Data was derived from multilateration
+#define MODES_ACFLAGS_ALTITUDE_HAE_VALID (1<<19) // altitude_hae is valid
+#define MODES_ACFLAGS_HAE_DELTA_VALID    (1<<20) // hae_delta is valid
 
 #define MODES_ACFLAGS_LLEITHER_VALID (MODES_ACFLAGS_LLEVEN_VALID | MODES_ACFLAGS_LLODD_VALID)
 #define MODES_ACFLAGS_LLBOTH_VALID   (MODES_ACFLAGS_LLEVEN_VALID | MODES_ACFLAGS_LLODD_VALID)
@@ -324,6 +326,7 @@ struct {                             // Internal state
     int   stats_range_histo;         // Collect/show a range histogram?
     int   onlyaddr;                  // Print only ICAO addresses
     int   metric;                    // Use metric units
+    int   use_hae;                   // Use HAE altitudes with H suffix when available
     int   mlat;                      // Use Beast ascii format for raw data output, i.e. @...; iso *...;
     int   interactive_rtl1090;       // flight table in interactive mode is formatted like RTL1090
     char *json_dir;                  // Path to json base directory, or NULL not to write json.
@@ -392,6 +395,8 @@ struct modesMessage {
     int    vert_rate;           // Vertical rate.
     int    velocity;            // Reported by aircraft, or computed from from EW and NS velocity
     unsigned category;          // A0 - D7 encoded as a single hex byte
+    int    altitude_hae;        // altitude reported as GNSS HAE
+    int    hae_delta;           // difference between HAE and baro alt
 
     // DF 18
     int    cf;                  // Control Field

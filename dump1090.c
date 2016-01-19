@@ -719,6 +719,7 @@ void showHelp(void) {
 "--stats-every <seconds>  Show and reset stats every <seconds> seconds\n"
 "--onlyaddr               Show only ICAO addresses (testing purposes)\n"
 "--metric                 Use metric units (meters, km/h, ...)\n"
+"--hae                    Show altitudes as HAE (with H suffix) when available\n"
 "--snip <level>           Strip IQ file removing samples < level\n"
 "--debug <flags>          Debug mode (verbose), see README for details\n"
 "--quiet                  Disable output to stdout. Use for daemon applications\n"
@@ -820,6 +821,10 @@ void backgroundTasks(void) {
             reset_stats(&Modes.stats_periodic);
 
             next_stats_display += Modes.stats;
+            if (next_stats_display <= now) {
+                /* something has gone wrong, perhaps the system clock jumped */
+                next_stats_display = now + Modes.stats;
+            }
         }
     }
 
@@ -1014,6 +1019,8 @@ int main(int argc, char **argv) {
             Modes.onlyaddr = 1;
         } else if (!strcmp(argv[j],"--metric")) {
             Modes.metric = 1;
+        } else if (!strcmp(argv[j],"--hae")) {
+            Modes.use_hae = 1;
         } else if (!strcmp(argv[j],"--aggressive")) {
             Modes.nfix_crc = MODES_MAX_BITERRORS;
         } else if (!strcmp(argv[j],"--interactive")) {

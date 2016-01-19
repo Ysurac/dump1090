@@ -40,6 +40,20 @@ SiteLon     = 9.0;
 SiteName    = "My Radar Site"; // tooltip of the marker
 
 
+// Extra map types to include. These work for maps with 256x256 tiles where a
+// URL can be constructed by simple substition of x/y tile number and zoom level
+var ExtraMapTypes = {
+        'OpenStreetMap'    : 'http://tile.openstreetmap.org/{z}/{x}/{y}.png',
+        // NB: the following generally only cover the US
+        'Sectional Charts' : 'http://wms.chartbundle.com/tms/1.0.0/sec/{z}/{x}/{y}.png?origin=nw',
+        'Terminal Charts'  : 'http://wms.chartbundle.com/tms/1.0.0/tac/{z}/{x}/{y}.png?origin=nw',
+        'World Charts'     : 'http://wms.chartbundle.com/tms/1.0.0/wac/{z}/{x}/{y}.png?origin=nw',
+        'IFR Low Charts'   : 'http://wms.chartbundle.com/tms/1.0.0/enrl/{z}/{x}/{y}.png?origin=nw',
+        'IFR Area Charts'  : 'http://wms.chartbundle.com/tms/1.0.0/enra/{z}/{x}/{y}.png?origin=nw',
+        'IFR High Charts'  : 'http://wms.chartbundle.com/tms/1.0.0/enrh/{z}/{x}/{y}.png?origin=nw'
+};
+
+
 // -- Marker settings -------------------------------------
 
 // These settings control the coloring of aircraft by altitude.
@@ -76,7 +90,10 @@ ColorByAlt = {
         selected : { h: 0, s: -10, l: +20 },
 
         // Changes added to the color of planes that have stale position info
-        stale :    { h: 0, s: -10, l: +30 }
+        stale :    { h: 0, s: -10, l: +30 },
+
+        // Changes added to the color of planes that have positions from mlat
+        mlat :     { h: 0, s: -10, l: -10 }
 };
 
 // For a monochrome display try this:
@@ -85,9 +102,15 @@ ColorByAlt = {
 //         ground  :  { h: 0, s: 0, l: 30 },
 //         air :      { h: [ { alt: 0, val: 0 } ], s: 0, l: 50 },
 //         selected : { h: 0, s: 0, l: +30 },
-//         stale :    { h: 0, s: 0, l: +30 }
+//         stale :    { h: 0, s: 0, l: +30 },
+//         mlat :     { h: 0, s: 0, l: -10 }
 // };
 
+// Outline color for aircraft icons with an ADS-B position
+OutlineADSBColor = '#000000';
+
+// Outline color for aircraft icons with a mlat position
+OutlineMlatColor = '#4040FF';
 
 SiteCircles = true; // true to show circles (only shown if the center marker is shown)
 // In nautical miles or km (depending settings value 'Metric')
